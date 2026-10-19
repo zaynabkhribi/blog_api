@@ -1,8 +1,12 @@
-const express = require ('express') ; // 1. charger la biblioth èque Express
+const express = require ('express') ; // 1. charger la bibliothèque Express
 const articleRoutes = require ('./routes/articleRoutes');
+const dotenv= require ('dotenv');
 const userRoutes = require ('./routes/userRoutes');
+const connectDB = require('./config/db');
+
+dotenv.config();
 const app = express () ; // 2. créer l’ application : c’est notre serveur
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 // Middlewares globaux
 app.use(express.json()); // indispensable pour lire le corps JSON (req.body)
 
@@ -17,6 +21,17 @@ app.get("/", (req, res) => {
   });
 });
 
-app.listen(PORT, () => {
-  console.log(`Serveur modulaire en écoute sur http://localhost:${PORT}`);
-});
+(async () => {
+  try {
+    await connectDB(process.env.MONGODB_URI);
+    app.listen(PORT, () => {
+          console.log(`MERN server running on http://localhost:${PORT}`);
+  });
+
+}
+  catch (error) {
+    console.error('(’Critical server startup error:', error.message);
+    process.exit(1); // Arrête le processus avec un code d'erreur
+  }
+})();
+
